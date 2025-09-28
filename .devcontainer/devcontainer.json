@@ -1,0 +1,47 @@
+{
+  "name": "AI Tools with Claude Code",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "workspaceFolder": "/workspace",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "npm install",
+
+  // Environment variables
+  "containerEnv": {
+    "GH_TOKEN": "${localEnv:GH_TOKEN}"
+  },
+
+  // Configure tool-specific properties.
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscode.typescript-language-features",
+        "vscode.json-language-features",
+        "ms-python.python",
+        "Anthropic.claude-code"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "typescript.suggest.autoImports": true,
+        "typescript.updateImportsOnFileMove.enabled": "always"
+      }
+    }
+  },
+
+  // Handle optional .claude folder creation before mounting
+  "initializeCommand": "mkdir -p ${localWorkspaceFolder}/.claude",
+
+  // Mount workspace, volumes for shell history, Claude auth, and GitHub CLI auth
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "source=ai-tools-shell-history,target=/home/node/.shell_history,type=volume",
+    "source=ai-tools-claude-auth,target=/home/node/.config/claude,type=volume",
+    "source=ai-tools-github-cli-auth,target=/home/node/.config/gh,type=volume",
+    "source=${localWorkspaceFolder}/.claude,target=/home/node/.claude,type=bind,consistency=cached"
+  ]
+}
