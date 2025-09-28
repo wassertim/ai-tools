@@ -11,7 +11,13 @@
     "lint": "echo \"Linting not configured\"",
     "type-check": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky"
+    "prepare": "husky",
+    "docker:build": "docker build -t mcp-tools-server:latest .",
+    "docker:run": "docker run --rm -i mcp-tools-server:latest",
+    "docker:compose:up": "docker-compose up --build -d",
+    "docker:compose:down": "docker-compose down",
+    "docker:compose:logs": "docker-compose logs -f",
+    "docker:push": "docker tag mcp-tools-server:latest your-registry/mcp-tools-server:latest && docker push your-registry/mcp-tools-server:latest"
   },
   "keywords": [],
   "author": "",

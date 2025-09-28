@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm
 
-# Install zsh and Playwright system dependencies
+# Install zsh, Playwright system dependencies, and Docker CLI
 USER root
 RUN apt-get update && apt-get install -y \
     zsh \
@@ -18,7 +18,21 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     libgbm1 \
     libasound2 \
+    ca-certificates \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Docker CLI
+RUN install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc && \
+    chmod a+r /etc/apt/keyrings/docker.asc && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y docker-ce-cli && \
+    rm -rf /var/lib/apt/lists/*
+
+# Add node user to docker group for Docker socket access
+RUN groupadd -f docker && usermod -aG docker node
 
 USER node
 RUN if [ ! -d "/home/node/.oh-my-zsh" ]; then \
@@ -34,7 +48,7 @@ RUN npm config set prefix ~/.npm-global && \
     npm install -g npm@latest @anthropic-ai/claude-code
 
 # Install Playwright separately to avoid dependency conflicts
-RUN npm install -g @playwright/test && \
+RUN npm install -g @playwright/test playwright && \
     npx playwright install chromium
 
 # Set up shell history persistence for both bash and zsh

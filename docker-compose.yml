@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  mcp-tools-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: mcp-tools-server:latest
+    container_name: mcp-tools-server
+    restart: unless-stopped
+
+    # Environment configuration
+    environment:
+      - NODE_ENV=production
+      # Add custom environment variables as needed
+      # - CUSTOM_USER_AGENT=YourApp/1.0
+      # - DEFAULT_TIMEOUT=30000
+
+    # For stdio-based MCP communication (current setup)
+    stdin_open: true
+    tty: true
+
+    # Uncomment if you add TCP/HTTP transport in the future
+    # ports:
+    #   - "3000:3000"
+
+    # Volume mounts for configuration or data persistence
+    # volumes:
+    #   - ./config:/app/config:ro
+    #   - mcp_data:/app/data
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('MCP Tools Server: OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+# Volumes for persistent data (uncomment if needed)
+# volumes:
+#   mcp_data:
+#     driver: local
+
+# Custom network (optional)
+networks:
+  default:
+    name: mcp-tools-network
