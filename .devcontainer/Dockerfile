@@ -1,8 +1,24 @@
 FROM mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm
 
-# Install zsh and oh-my-zsh
+# Install zsh and Playwright system dependencies
 USER root
-RUN apt-get update && apt-get install -y zsh && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    zsh \
+    libnspr4 \
+    libnss3 \
+    libdbus-1-3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libxkbcommon0 \
+    libatspi2.0-0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    && rm -rf /var/lib/apt/lists/*
 
 USER node
 RUN if [ ! -d "/home/node/.oh-my-zsh" ]; then \
@@ -16,6 +32,10 @@ RUN npm config set prefix ~/.npm-global && \
     echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc && \
     echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc && \
     npm install -g npm@latest @anthropic-ai/claude-code
+
+# Install Playwright separately to avoid dependency conflicts
+RUN npm install -g @playwright/test && \
+    npx playwright install chromium
 
 # Set up shell history persistence for both bash and zsh
 RUN echo 'export HISTFILE=/home/node/.shell_history/.bash_history' >> /home/node/.bashrc && \
