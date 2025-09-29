@@ -6,11 +6,22 @@ on:
       - main
     types:
       - closed
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.2.3)'
+        required: false
+        type: string
+      latest:
+        description: 'Tag as latest'
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   docker:
-    # Only run on merged PRs to main
-    if: github.event.pull_request.merged == true
+    # Run on merged PRs to main or manual workflow dispatch
+    if: (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
@@ -36,6 +47,8 @@ jobs:
             type=ref,event=pr
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ github.event.inputs.version }},enable=${{ github.event.inputs.version != '' }}
+            type=raw,value=latest,enable=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.latest == 'true' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
