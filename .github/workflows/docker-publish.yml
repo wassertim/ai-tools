@@ -8,10 +8,21 @@ on:
       - closed
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Release version (e.g., v1.2.3)'
+      version_bump:
+        description: 'Version bump type'
         required: false
-        type: string
+        default: 'none'
+        type: choice
+        options:
+          - none
+          - patch
+          - minor
+          - major
+      use_package_version:
+        description: 'Use current package.json version'
+        required: false
+        default: true
+        type: boolean
       latest:
         description: 'Tag as latest'
         required: false
@@ -27,6 +38,31 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Bump version if requested
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version_bump != 'none'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          npm version ${{ github.event.inputs.version_bump }} --no-git-tag-version
+          git add package.json package-lock.json
+          git commit -m "Bump version to $(jq -r .version package.json)"
+          git push
+
+      - name: Extract version from package.json
+        id: package_version
+        run: |
+          VERSION=$(jq -r .version package.json)
+          echo "version=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Package version: v$VERSION"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -47,7 +83,7 @@ jobs:
             type=ref,event=pr
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=${{ github.event.inputs.version }},enable=${{ github.event.inputs.version != '' }}
+            type=raw,value=${{ steps.package_version.outputs.version }},enable=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.use_package_version == 'true' }}
             type=raw,value=latest,enable=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.latest == 'true' }}
 
       - name: Build and push Docker image
@@ -60,3 +96,18 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Create GitHub Release
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version_bump != 'none'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ steps.package_version.outputs.version }} \
+            --title "Release ${{ steps.package_version.outputs.version }}" \
+            --notes "## Docker Image
+          \`\`\`bash
+          docker pull ${{ secrets.DOCKER_USERNAME }}/mcp-tools-server:${{ steps.package_version.outputs.version }}
+          \`\`\`
+
+          ## What's Changed
+          Auto-generated release for version ${{ steps.package_version.outputs.version }}"

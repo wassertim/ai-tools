@@ -208,10 +208,28 @@ To enable automatic Docker image publishing, configure the following secrets in 
 2. Click "New repository secret"
 3. Add both `DOCKER_USERNAME` and `DOCKER_PASSWORD`
 
-The workflow will automatically:
+### Automated Workflows
+
+**On PR Merge:**
 - Build multi-platform Docker images (AMD64 and ARM64)
-- Tag images with branch name, commit SHA, and `latest` for main branch
+- Tag images with branch name, commit SHA, and `latest`
 - Push to `{your-username}/mcp-tools-server` on Docker Hub
+
+**Manual Release (GitHub Actions → Run workflow):**
+- **Version Bump**: Choose `patch`, `minor`, or `major` to automatically increment `package.json` version
+- **Use Package Version**: Uses current `package.json` version for Docker tag (e.g., `v1.2.3`)
+- **Tag as Latest**: Optionally tag as `latest` in addition to version tag
+- **GitHub Release**: Automatically creates a GitHub release with Docker pull instructions
+
+### Release Process
+1. Go to **Actions** → **Build and Push Docker Image** → **Run workflow**
+2. Select version bump type (`patch` for bug fixes, `minor` for features, `major` for breaking changes)
+3. Choose whether to tag as `latest`
+4. The workflow will:
+   - Bump `package.json` version
+   - Commit and push the version change
+   - Build and tag Docker image with new version
+   - Create GitHub release with Docker pull instructions
 
 ## 🔒 Security Features
 
