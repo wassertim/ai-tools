@@ -104,10 +104,22 @@ jobs:
         run: |
           gh release create ${{ steps.package_version.outputs.version }} \
             --title "Release ${{ steps.package_version.outputs.version }}" \
-            --notes "## Docker Image
+            --notes "## 🐳 Docker Image
           \`\`\`bash
           docker pull ${{ secrets.DOCKER_USERNAME }}/mcp-tools-server:${{ steps.package_version.outputs.version }}
           \`\`\`
 
-          ## What's Changed
-          Auto-generated release for version ${{ steps.package_version.outputs.version }}"
+          ## 🔧 Claude MCP Installation
+          \`\`\`bash
+          claude mcp add-json mcp-tools-server '{\"command\": \"docker\", \"args\": [\"run\", \"--rm\", \"-i\", \"${{ secrets.DOCKER_USERNAME }}/mcp-tools-server:${{ steps.package_version.outputs.version }}\"]}}'
+          \`\`\`
+
+          ## 📋 What's Included
+          - Multi-platform Docker image (AMD64 + ARM64)
+          - Playwright-based web fetcher with anti-bot detection
+          - Site-specific strategies for popular sites
+          - Production-ready containerized deployment
+
+          ## 🔗 Links
+          - [Docker Hub](https://hub.docker.com/r/${{ secrets.DOCKER_USERNAME }}/mcp-tools-server)
+          - [Installation Guide](https://github.com/${{ github.repository }}#installation)"

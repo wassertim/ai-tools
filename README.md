@@ -229,7 +229,10 @@ To enable automatic Docker image publishing, configure the following secrets in 
    - Bump `package.json` version
    - Commit and push the version change
    - Build and tag Docker image with new version
-   - Create GitHub release with Docker pull instructions
+   - Create GitHub release with:
+     - Docker pull command for the specific version
+     - Claude MCP installation command with version-pinned Docker image
+     - Links to Docker Hub and installation guide
 
 ## 🔒 Security Features
 
