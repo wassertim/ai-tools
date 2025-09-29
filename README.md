@@ -282,7 +282,7 @@ DEBUG=* npm run dev
 
 ## 📄 License
 
-ISC License - see LICENSE file for details
+MIT License - see LICENSE file for details
 
 ## 🔗 Links
 

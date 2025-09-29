@@ -34,12 +34,16 @@ jobs:
     # Run on merged PRs to main or manual workflow dispatch
     if: (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -50,8 +54,8 @@ jobs:
       - name: Bump version if requested
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.version_bump != 'none'
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           npm version ${{ github.event.inputs.version_bump }} --no-git-tag-version
           git add package.json package-lock.json
           git commit -m "Bump version to $(jq -r .version package.json)"
