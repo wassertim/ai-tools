@@ -189,10 +189,29 @@ npm run docker:compose:up
 ```
 
 ### Production Deployment
+Docker images are automatically built and pushed to Docker Hub when PRs are merged to main via GitHub Actions.
+
+**Manual deployment:**
 ```bash
 # Tag and push to registry
 npm run docker:push
 ```
+
+### CI/CD Setup
+To enable automatic Docker image publishing, configure the following secrets in your GitHub repository:
+
+1. **`DOCKER_USERNAME`**: Your Docker Hub username
+2. **`DOCKER_PASSWORD`**: Your Docker Hub password or access token
+
+**Setting up secrets:**
+1. Go to your GitHub repository → Settings → Secrets and variables → Actions
+2. Click "New repository secret"
+3. Add both `DOCKER_USERNAME` and `DOCKER_PASSWORD`
+
+The workflow will automatically:
+- Build multi-platform Docker images (AMD64 and ARM64)
+- Tag images with branch name, commit SHA, and `latest` for main branch
+- Push to `{your-username}/mcp-tools-server` on Docker Hub
 
 ## 🔒 Security Features
 
