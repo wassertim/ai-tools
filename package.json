@@ -1,6 +1,6 @@
 {
   "name": "mcp-tools-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server with custom tools including Playwright-based web fetcher",
   "main": "index.js",
   "type": "module",
